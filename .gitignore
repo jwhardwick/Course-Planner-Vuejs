@@ -1,0 +1,6 @@
+node_modules
+.DS_Store
+post.sh
+scraps.html
+server-dynamo.js
+server-with-externaldb.js

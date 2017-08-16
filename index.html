@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <title>Course Test Playground</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/node_modules/bulma/css/bulma.css">
+
+</head>
+
+<body>
+
+
+    <div id="root" class="container">
+
+        <hero-banner ></hero-banner>
+
+        <semesters></semesters>
+
+        <subject-panel v-if="isSubjectPanelActive"
+        :subject-data="activeSubject"></subject-panel>
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <!-- JS -->
+    <script src="./node_modules/vue/dist/vue.js"></script>
+
+    <script src="./node_modules/axios/dist/axios.js"></script>
+
+    <script src="./node_modules/font-awesome/less/icons.less"></script>
+
+    <!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script> -->
+
+    <!-- <script src="https://use.fontawesome.com/091a3bd180.js"></script> -->
+
+    <script src="./app.js"></script>
+
+
+</body>
+
+</html>

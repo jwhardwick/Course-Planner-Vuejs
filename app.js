@@ -309,9 +309,90 @@ Vue.component('subject-panel', {
 
 })
 
+
+Vue.component('autocomplete', {
+
+    data() {
+        return {
+            searchField: '',
+
+            suggestions: []
+        }
+    },
+
+    template: `
+        <div class="dropdown" :class="{ 'is-active': isActive() }">
+            <input class="input is-small" type="text" placeholder="Auto complete..." v-on:keyup="getMatches()" v-model="searchField">
+
+
+
+
+              <div class="dropdown-trigger">
+
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+                <div class="dropdown-content">
+                  <a href="#" class="dropdown-item" v-for="suggestion in this.suggestions" @click="chooseSubject(suggestion.unit_code)">
+
+                        {{ suggestion.unit_code }}:
+                        {{ suggestion.unit_name }}
+
+                  </a>
+                </div>
+              </div>
+
+
+        </div>
+        `,
+
+    methods: {
+        getMatches() {
+            console.log(this.searchField)
+
+            if (this.searchField.length < 3) {
+                this.suggestions = []
+            }
+
+            if ( this.searchField.length >= 3) {
+                axios.post('/api/auto', {field : this.searchField})
+                .then(response => {
+                    // console.log(response.data)
+                    let newSuggestions = []
+                    this.suggestions = []
+                    for (var i = 0; i < response.data.length; i++) {
+                        console.log(response.data[i])
+                        newSuggestions.push(response.data[i])
+                    }
+                    if (newSuggestions != this.suggestions) {
+                        this.suggestions = newSuggestions
+                    }
+
+                })
+            }
+
+        },
+
+        isActive() {
+            if (this.suggestions.length > 0) {
+                return true
+            }
+            return false
+        },
+
+        chooseSubject(unit_code) {
+            // this.isActive = false
+            this.searchField = unit_code
+        }
+
+    }
+})
+
+
+
 new Vue({
 
     el: '#root',
+
 
     data() {
         return {

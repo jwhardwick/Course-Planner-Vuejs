@@ -19,7 +19,7 @@ console.log("Node server up!")
 
 
 app.listen(process.env.PORT || 5000, ()=> {
-    console.log('Now listening on 3000')
+    console.log('Now listening on 5000')
 })
 
 
@@ -39,7 +39,7 @@ app.post('/api/database', (req, res)=> {
     db.get("SELECT * FROM SubjectInfo WHERE unit_code = ?", {
         1: code }, (err, row) => {
             if (err) {
-                console.log(error)
+                console.log(err)
                 res.send("error msg from api")
             } else {
                 console.log(row)
@@ -51,7 +51,26 @@ app.post('/api/database', (req, res)=> {
 
 })
 
+app.post('/api/auto', (req, res)=> {
+    console.log("/api/auto")
+    console.log(req.body.field)
+    field = req.body.field.toUpperCase()
 
+    field = '%' + field + '%'
+
+
+    db.all("SELECT unit_code, unit_name FROM SubjectInfo WHERE unit_code LIKE ? OR unit_name LIKE ? LIMIT 5;", {
+        1: field, 2: field}, (err, data) => {
+            if (err) {
+                console.log(err)
+                res.send("error msg from api")
+            } else {
+                console.log(data)
+                res.json(data)
+            }
+    })
+
+})
 
 
 app.get('/axios', (req, res)=> {

@@ -78,7 +78,14 @@ Vue.component('semesters', {
                         <div class="panel-block">
                           <p class="control has-icons-left has-addons">
 
+
+
                             <input class="input is-small" type="text" placeholder="Subject code..." v-on:keyup.enter="getCourse(semester.searchField, semester.year, semester.sem)" v-model="semester.searchField">
+
+                                <autocomplete>
+                                </autocomplete>
+
+                            </input>
 
 
 
@@ -125,7 +132,14 @@ Vue.component('semesters', {
                 creditPoints: 0
             },
             semesters: [],
-            showDropdown: true
+            showDropdown: true,
+            searchField: '',
+
+            show: false,
+
+            selected: false,
+
+            suggestions: []
         }
     },
 
@@ -216,7 +230,51 @@ Vue.component('semesters', {
             console.log(subject)
 
             Event.fire('openSubjectPanel', subject)
+        },
+        getMatches() {
+            console.log(this.searchField)
+
+            if (this.searchField.length < 3) {
+                this.suggestions = []
+            }
+
+            if ( this.searchField.length >= 3) {
+                axios.post('/api/auto', {field : this.searchField})
+                .then(response => {
+                    // console.log(response.data)
+                    let newSuggestions = []
+                    this.suggestions = []
+                    for (var i = 0; i < response.data.length; i++) {
+                        console.log(response.data[i])
+                        newSuggestions.push(response.data[i])
+                    }
+                    if (newSuggestions != this.suggestions) {
+                        this.suggestions = newSuggestions
+                    }
+
+                })
+            }
+
+        },
+
+        chooseSubject(unit_code) {
+            // this.isActive = false
+            this.searchField = unit_code
         }
+
+    },
+
+    computed: {
+
+        isActive: function () {
+            if (this.suggestions.length > 0) {
+                this.show = true
+            } else {
+                this.show = false
+            }
+
+            return this.show
+        },
     }
 
 })
@@ -312,17 +370,29 @@ Vue.component('subject-panel', {
 
 Vue.component('autocomplete', {
 
+    // Will be difficult to integrate into current spaghetti code
+    // Next step should be refactoring semesters into something less insane
+
+
+    // Only want it to show options if text box is selected
+    // this is a non trivial problem
     data() {
         return {
             searchField: '',
 
-            suggestions: []
+            show: false,
+
+            focus: false,
+
+            suggestions: [],
+
+            activeSuggestionIndex: 0
         }
     },
 
     template: `
-        <div class="dropdown" :class="{ 'is-active': isActive() }">
-            <input class="input is-small" type="text" placeholder="Auto complete..." v-on:keyup="getMatches()" v-model="searchField">
+        <div class="dropdown" :class="{ 'is-active': isActive }">
+            <input class="input is-small" type="text" placeholder="Auto complete..." v-on:keyup="getMatches()" v-model="searchField" @focus="onFocus()" @blur="onBlur()" @keyup.up="upActiveSuggestion()" @keyup.down="downActiveSuggestion()" @keydown.enter="enterSubject()"">
 
 
 
@@ -332,9 +402,9 @@ Vue.component('autocomplete', {
               </div>
               <div class="dropdown-menu" id="dropdown-menu4" role="menu">
                 <div class="dropdown-content">
-                  <a href="#" class="dropdown-item" v-for="suggestion in this.suggestions" @click="chooseSubject(suggestion.unit_code)">
+                  <a href="#" class="dropdown-item" v-for="suggestion in this.suggestions" @mousedown="chooseSubject(suggestion.unit_code)" :class="{ 'is-active': activeSuggestion(suggestion) }" >
 
-                        {{ suggestion.unit_code }}:
+                        <b>{{ suggestion.unit_code }}</b><br>
                         {{ suggestion.unit_name }}
 
                   </a>
@@ -360,6 +430,8 @@ Vue.component('autocomplete', {
                     let newSuggestions = []
                     this.suggestions = []
                     for (var i = 0; i < response.data.length; i++) {
+
+                        response.data[i].index = i
                         console.log(response.data[i])
                         newSuggestions.push(response.data[i])
                     }
@@ -372,18 +444,70 @@ Vue.component('autocomplete', {
 
         },
 
-        isActive() {
-            if (this.suggestions.length > 0) {
+        chooseSubject(unit_code) {
+            // this.isActive = false
+            console.log(unit_code)
+
+            // Now I have the subject code
+            // Add to subject list.
+            this.searchField = unit_code
+
+        },
+
+        onFocus() {
+            this.focus = true
+        },
+
+        onBlur() {
+            this.searchField = ''
+            this.suggestions = []
+            this.activeSuggestionIndex = 0
+            // this.focus = false
+        },
+
+        upActiveSuggestion() {
+            console.log("upSuggestionIndex")
+            if (this.activeSuggestionIndex > 0) {
+                this.activeSuggestionIndex--
+            }
+
+        },
+
+        downActiveSuggestion() {
+            if (this.activeSuggestionIndex < this.suggestions.length - 1) {
+                this.activeSuggestionIndex++
+            }
+
+        },
+
+        activeSuggestion(suggestion) {
+
+            if (this.activeSuggestionIndex == suggestion.index) {
                 return true
             }
             return false
+
         },
 
-        chooseSubject(unit_code) {
-            // this.isActive = false
-            this.searchField = unit_code
+        enterSubject() {
+            console.log(this.suggestions[this.activeSuggestionIndex].unit_code)
+            this.searchField = ''
+            this.suggestions = []
+            this.activeSuggestionIndex = 0
         }
+    },
 
+    computed: {
+
+        isActive: function () {
+            if (this.suggestions.length > 0 && this.focus) {
+                this.show = true
+            } else {
+                this.show = false
+            }
+
+            return this.show
+        }
     }
 })
 

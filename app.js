@@ -392,7 +392,7 @@ Vue.component('autocomplete', {
 
     template: `
         <div class="dropdown" :class="{ 'is-active': isActive }">
-            <input class="input is-small" type="text" placeholder="Auto complete..." v-on:keyup="getMatches()" v-model="searchField" @focus="onFocus()" @blur="onBlur()" @keyup.up="upActiveSuggestion()" @keyup.down="downActiveSuggestion()" @keydown.enter="enterSubject()"">
+            <input class="input is-small" type="text" placeholder="Auto complete..." v-on:keyup="getMatches()" v-model="searchField" @focus="onFocus()" @blur="onBlur()" @keydown.up="upActiveSuggestion()" @keydown.down="downActiveSuggestion()" @keydown.enter="enterSubject()"">
 
 
 

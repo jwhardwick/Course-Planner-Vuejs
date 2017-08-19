@@ -15,11 +15,11 @@ const db = new sqlite3.Database('CoursePlanner.db')
 const axios = require('axios')
 
 
-console.log("Node server up!")
+//console.log("Node server up!")
 
 
 app.listen(process.env.PORT || 5000, ()=> {
-    console.log('Now listening on 5000')
+    //console.log('Now listening on 5000')
 })
 
 
@@ -30,8 +30,8 @@ app.get('/', (req, res)=> {
 
 
 app.post('/api/database', (req, res)=> {
-    console.log("req + body")
-    console.log(req.body)
+    //console.log("req + body")
+    //console.log(req.body)
 
     code = req.body.code.toUpperCase()
 
@@ -39,10 +39,10 @@ app.post('/api/database', (req, res)=> {
     db.get("SELECT * FROM SubjectInfo WHERE unit_code = ?", {
         1: code }, (err, row) => {
             if (err) {
-                console.log(err)
+                //console.log(err)
                 res.send("error msg from api")
             } else {
-                console.log(row)
+                //console.log(row)
                 res.json(row)
             }
     })
@@ -52,8 +52,8 @@ app.post('/api/database', (req, res)=> {
 })
 
 app.post('/api/auto', (req, res)=> {
-    console.log("/api/auto")
-    console.log(req.body.field)
+    //console.log("/api/auto")
+    //console.log(req.body.field)
     field = req.body.field.toUpperCase()
 
     field = '%' + field + '%'
@@ -62,10 +62,10 @@ app.post('/api/auto', (req, res)=> {
     db.all("SELECT unit_code, unit_name FROM SubjectInfo WHERE unit_code LIKE ? OR unit_name LIKE ? LIMIT 5;", {
         1: field, 2: field}, (err, data) => {
             if (err) {
-                console.log(err)
+                //console.log(err)
                 res.send("error msg from api")
             } else {
-                console.log(data)
+                //console.log(data)
                 res.json(data)
             }
     })
@@ -100,7 +100,7 @@ app.get('/node_modules/font-awesome/dist/icons.less', (req, res)=> {
 
 // app.post('/test', (req, res)=> {
 //
-//     console.log(req.body.code)
+////     console.log(req.body.code)
 //
 //     params = {
 //         TableName: 'Subjects',
@@ -109,9 +109,9 @@ app.get('/node_modules/font-awesome/dist/icons.less', (req, res)=> {
 //
 //     db.get(params, (err, data) => {
 //         if (err) {
-//             console.error("Unable to read item. Error: ", JSON.stringify(err, null, 2))
+////             console.error("Unable to read item. Error: ", JSON.stringify(err, null, 2))
 //         } else {
-//             console.log("GetItem succeeded: ", JSON.stringify(data, null, 2))
+////             console.log("GetItem succeeded: ", JSON.stringify(data, null, 2))
 //         }
 //         res.redirect('/')
 //     })
@@ -121,7 +121,7 @@ app.get('/node_modules/font-awesome/dist/icons.less', (req, res)=> {
 
 // app.get('/test_db', (req, res)=> {
 //
-//     // console.log(req.body)
+////     // console.log(req.body)
 //
 //     params = {
 //         TableName: 'Subjects',
@@ -130,9 +130,9 @@ app.get('/node_modules/font-awesome/dist/icons.less', (req, res)=> {
 //
 //     db.get(params, (err, data) => {
 //         if (err) {
-//             console.error("Unable to read item. Error: ", JSON.stringify(err, null, 2))
+////             console.error("Unable to read item. Error: ", JSON.stringify(err, null, 2))
 //         } else {
-//             console.log("GetItem succeeded: ", JSON.stringify(data, null, 2))
+////             console.log("GetItem succeeded: ", JSON.stringify(data, null, 2))
 //         }
 //         res.redirect('/')
 //     })

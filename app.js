@@ -194,19 +194,19 @@ Vue.component('semesters', {
                     }
               })
               .catch(function (error) {
-                  console.log(error);
+                  // console.log(error);
               })
         },
 
         openSubject(semester, subject) {
 
-            console.log(subject)
+            // console.log(subject)
 
             Event.fire('openSubjectPanel', subject)
 
         },
         getMatches() {
-            console.log(this.searchField)
+            // console.log(this.searchField)
 
             if (this.searchField.length < 3) {
                 this.suggestions = []
@@ -215,11 +215,11 @@ Vue.component('semesters', {
             if ( this.searchField.length >= 3) {
                 axios.post('/api/auto', {field : this.searchField})
                 .then(response => {
-                    // console.log(response.data)
+                    // // console.log(response.data)
                     let newSuggestions = []
                     this.suggestions = []
                     for (var i = 0; i < response.data.length; i++) {
-                        console.log(response.data[i])
+                        // console.log(response.data[i])
                         newSuggestions.push(response.data[i])
                     }
                     if (newSuggestions != this.suggestions) {
@@ -404,7 +404,7 @@ Vue.component('autocomplete', {
 
     methods: {
         getMatches() {
-            console.log(this.searchField)
+            // console.log(this.searchField)
 
             if (this.searchField.length < 3) {
                 this.suggestions = []
@@ -413,13 +413,13 @@ Vue.component('autocomplete', {
             if ( this.searchField.length >= 3) {
                 axios.post('/api/auto', {field : this.searchField})
                 .then(response => {
-                    // console.log(response.data)
+                    // // console.log(response.data)
                     let newSuggestions = []
                     this.suggestions = []
                     for (var i = 0; i < response.data.length; i++) {
 
                         response.data[i].index = i
-                        console.log(response.data[i])
+                        // console.log(response.data[i])
                         newSuggestions.push(response.data[i])
                     }
                     if (newSuggestions != this.suggestions) {
@@ -433,7 +433,7 @@ Vue.component('autocomplete', {
 
         chooseSubject(unit_code) {
             // this.isActive = false
-            console.log(unit_code)
+            // console.log(unit_code)
 
             // Now I have the subject code
             // Add to subject list.
@@ -453,7 +453,7 @@ Vue.component('autocomplete', {
         },
 
         upActiveSuggestion() {
-            console.log("upSuggestionIndex")
+            // console.log("upSuggestionIndex")
             if (this.activeSuggestionIndex > 0) {
                 this.activeSuggestionIndex--
             }
@@ -477,7 +477,7 @@ Vue.component('autocomplete', {
         },
 
         enterSubject() {
-            console.log(this.suggestions[this.activeSuggestionIndex].unit_code)
+            // console.log(this.suggestions[this.activeSuggestionIndex].unit_code)
 
             let uosCode = this.suggestions[this.activeSuggestionIndex].unit_code
 
@@ -488,7 +488,7 @@ Vue.component('autocomplete', {
 
             Event.fire('addSubjectParent', data)
 
-            // console.log(this.id)
+            // // console.log(this.id)
 
             this.searchField = ''
             this.suggestions = []
@@ -528,16 +528,16 @@ new Vue({
 
     mounted() {
 
-        // axios.get('/axios').then(response => console.log(response))
+        // axios.get('/axios').then(response => // console.log(response))
 
         // axios.post('/api/database', {
         //     code: 'COMP2129'
         //   })
         //   .then(function (response) {
-        //     console.log(response);
+            // // console.log(response);
         //   })
         //   .catch(function (error) {
-        //     console.log(error);
+            // // console.log(error);
         //   })
 
     },
@@ -549,7 +549,7 @@ new Vue({
 
             this.activeSubject = data
             this.isSubjectPanelActive = true
-            console.log(data.unit_code)
+            // console.log(data.unit_code)
 
         }),
 

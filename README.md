@@ -1,6 +1,6 @@
 A single page web app that helps students from USYD plan their course schedule. The current system makes it difficult to quickly look up other subjects to find out prerequisites, so I wanted to develop an app that aided with that.
 
-Live version is <a href="http://course-planner-vue.herokuapp.com/">here</a>.
+Live version is <a href="https://usyd-planner.herokuapp.com/">here</a>.
 
 Front end is handled by Vue.js, which communicates with an Express/Node.js server via Axios. Data is stored in sqlite.
 

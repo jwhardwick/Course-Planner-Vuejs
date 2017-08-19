@@ -19,19 +19,24 @@
 
     <div id="root" class="container">
 
-        <hero-banner ></hero-banner>
+        <div style="height:calc(100vh - 180px);">
+            <hero-banner ></hero-banner>
 
-        <!-- <autocomplete></autocomplete> -->
+            <!-- <autocomplete></autocomplete> -->
 
-        <semesters></semesters>
+            <section class="section">
+                <semesters></semesters>
+            </section>
 
-        <subject-panel v-if="isSubjectPanelActive"
-        :subject-data="activeSubject"></subject-panel>
+            <subject-panel v-if="isSubjectPanelActive"
+            :subject-data="activeSubject"></subject-panel>
+        </div>
 
 
 
 
 
+        <app-footer style="height:150px;"></app-footer>
     </div>
 
 
@@ -52,8 +57,6 @@
     <!-- <script src="https://use.fontawesome.com/npm 091a3bd180.js"></script> -->
 
     <script src="./app.js"></script>
-
-
 
 </body>
 

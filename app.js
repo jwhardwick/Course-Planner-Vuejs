@@ -40,7 +40,7 @@ Vue.component('semesters', {
 
             <div class="control" v-show="showDropdown" >
                   <div class="select" >
-                    <select v-model="newSemester.year">
+                    <select v-model="nextSemester.year">
                       <option>2009</option>
                       <option>2010</option>
                       <option>2011</option>
@@ -78,7 +78,13 @@ Vue.component('semesters', {
                         <div class="panel-block">
                           <p class="control has-icons-left has-addons">
 
-                            <input class="input is-small" type="text" placeholder="Subject code..." v-on:keyup.enter="getCourse(semester.searchField, semester.year, semester.sem)" v-model="semester.searchField">
+
+
+
+                                <autocomplete :id="semesters[semester.id].id">
+                                </autocomplete>
+
+                            </input>
 
 
 
@@ -116,99 +122,80 @@ Vue.component('semesters', {
 
     data() {
         return {
-            newSemester: {
+
+            nextSemester: {
+                id: 0,
                 isSelected: false,
                 field: '',
                 year: 2016,
-                sem: '',
+                sem: 1,
                 subjects: [],
                 creditPoints: 0
             },
             semesters: [],
-            showDropdown: true
+            showDropdown: true,
+            searchField: '',
+
+            show: false,
+
+            selected: false,
+
+            suggestions: []
         }
     },
 
     methods: {
         addSemester() {
-            console.log("Add Semester")
-            console.log(this.newSemester)
+            // Get rid of year selection dropdown
+            this.showDropdown = false
 
-            if (this.showDropdown) {
-                // First time adding a semester
-                // Send event to another component where they can add year?
-
-                this.newSemester.sem = 1
-
-                this.showDropdown = false
-
-                this.semesters.push(this.newSemester)
-
-                let oldYear = parseInt(this.newSemester.year)
-
-                this.newSemester = { year: oldYear, sem: 2, subjects: [], searchField: '', isSelected: false, creditPoints: 0 }
+            // Build our semester to add
+            let newSemester = {
+                id: this.nextSemester.id,
+                isSelected: false,
+                field: '',
+                year: this.nextSemester.year,
+                sem: this.nextSemester.sem,
+                subjects: [],
+                creditPoints: 0
             }
-            else if (this.newSemester.sem == 2) {
-                // No problem
-                this.semesters.push(this.newSemester)
+            this.semesters.push(newSemester)
 
-                let oldYear = this.newSemester.year
-
-                this.newSemester = { year: oldYear + 1, sem: 1, subjects: [], searchField: '', isSelected: false, creditPoints: 0  }
+            // reset and get ready for next semester
+            if (this.nextSemester.sem == 2) {
+                this.nextSemester.sem = 1
+                this.nextSemester.year++
+            } else {
+                this.nextSemester.sem++
             }
-            else {
-                //
-                this.semesters.push(this.newSemester)
 
-                let oldYear = this.newSemester.year
-
-                this.newSemester = { year: oldYear, sem: 2, subjects: [], searchField: '', isSelected: false, creditPoints: 0  }
-            }
+            this.nextSemester.id++
+            this.nextSemester.year           = parseInt(this.nextSemester.year)
+            this.nextSemester.subjects       = []
+            this.nextSemester.searchField    = ''
+            this.nextSemester.isSelected     = false
+            this.nextSemester.creditPoints   = 0
         },
 
-        getCourse(uosCode, year, sem) {
+        getCourse(uosCode, id) {
 
-            console.log("getCourse(uosCode, year, sem): " + uosCode + ", " + year + ", " + sem)
-
-            console.log("this.semester: " + this.newSemester)
             const vm = this;
-
-            for (let i = 0; i < vm.semesters.length; i++) {
-                if (vm.semesters[i].year == year && vm.semesters[i].sem == sem) {
-                    console.log("Match found at: " + i)
-                    console.log("vm.semesters[i]: " + vm.semesters[i] )
-                    vm.semesters[i].searchField = ''
-                }
-            }
-
+            this.semesters[id].searchField = ''
 
             axios.post('/api/database', {
                 code: uosCode
               })
               .then(function (response) {
-
-                    console.log("reponse.data")
-                    console.log(response.data);
-
                     if (response.data) {
-                        for (let i = 0; i < vm.semesters.length; i++) {
-                            if (vm.semesters[i].year == year && vm.semesters[i].sem == sem) {
-                                console.log("Match found at: " + i)
-                                console.log("vm.semesters[i]: " + vm.semesters[i] )
-                                vm.semesters[i].subjects.push(response.data)
-                                vm.semesters[i].creditPoints += parseInt(response.data.credit_points)
+                        vm.semesters[id].subjects.push(response.data)
+                        vm.semesters[id].creditPoints += parseInt(response.data.credit_points)
 
-                                Event.fire('addPoints', parseInt(response.data.credit_points))
-                            }
-                        }
+                        Event.fire('addPoints', parseInt(response.data.credit_points))
                     }
-
-
               })
               .catch(function (error) {
                   console.log(error);
               })
-
         },
 
         openSubject(semester, subject) {
@@ -216,8 +203,63 @@ Vue.component('semesters', {
             console.log(subject)
 
             Event.fire('openSubjectPanel', subject)
+
+        },
+        getMatches() {
+            console.log(this.searchField)
+
+            if (this.searchField.length < 3) {
+                this.suggestions = []
+            }
+
+            if ( this.searchField.length >= 3) {
+                axios.post('/api/auto', {field : this.searchField})
+                .then(response => {
+                    // console.log(response.data)
+                    let newSuggestions = []
+                    this.suggestions = []
+                    for (var i = 0; i < response.data.length; i++) {
+                        console.log(response.data[i])
+                        newSuggestions.push(response.data[i])
+                    }
+                    if (newSuggestions != this.suggestions) {
+                        this.suggestions = newSuggestions
+                    }
+
+                })
+            }
+
+        },
+
+        chooseSubject(unit_code) {
+            // this.isActive = false
+            this.searchField = unit_code
         }
+
+    },
+
+    computed: {
+
+        isActive: function () {
+            if (this.suggestions.length > 0) {
+                this.show = true
+            } else {
+                this.show = false
+            }
+
+            return this.show
+        },
+    },
+
+    mounted() {
+
+        Event.listen('addSubject', (data) => this.getCourse(data.uosCode, data.id))
+
     }
+
+
+
+
 
 })
 
@@ -309,12 +351,175 @@ Vue.component('subject-panel', {
 
 })
 
+
+Vue.component('autocomplete', {
+
+    // Will be difficult to integrate into current spaghetti code
+    // Next step should be refactoring semesters into something less insane
+
+
+    // Only want it to show options if text box is selected
+    // this is a non trivial problem
+
+    props: ['id'],
+
+    data() {
+        return {
+            searchField: '',
+
+            show: false,
+
+            focus: false,
+
+            suggestions: [],
+
+            activeSuggestionIndex: 0
+        }
+    },
+
+    template: `
+        <div class="dropdown" :class="{ 'is-active': isActive }">
+            <input class="input is-small" type="text" placeholder="Enter subject..." v-on:keyup="getMatches()" v-model="searchField" @focus="onFocus()" @blur="onBlur()" @keydown.up="upActiveSuggestion()" @keydown.down="downActiveSuggestion()" @keydown.enter="enterSubject()"">
+
+
+
+
+              <div class="dropdown-trigger">
+
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+                <div class="dropdown-content">
+                  <a href="#" class="dropdown-item" v-for="suggestion in this.suggestions" @mousedown="chooseSubject(suggestion.unit_code)" :class="{ 'is-active': activeSuggestion(suggestion) }" >
+
+                        <b>{{ suggestion.unit_code }}</b><br>
+                        {{ suggestion.unit_name }}
+
+                  </a>
+                </div>
+              </div>
+
+
+        </div>
+        `,
+
+    methods: {
+        getMatches() {
+            console.log(this.searchField)
+
+            if (this.searchField.length < 3) {
+                this.suggestions = []
+            }
+
+            if ( this.searchField.length >= 3) {
+                axios.post('/api/auto', {field : this.searchField})
+                .then(response => {
+                    // console.log(response.data)
+                    let newSuggestions = []
+                    this.suggestions = []
+                    for (var i = 0; i < response.data.length; i++) {
+
+                        response.data[i].index = i
+                        console.log(response.data[i])
+                        newSuggestions.push(response.data[i])
+                    }
+                    if (newSuggestions != this.suggestions) {
+                        this.suggestions = newSuggestions
+                    }
+
+                })
+            }
+
+        },
+
+        chooseSubject(unit_code) {
+            // this.isActive = false
+            console.log(unit_code)
+
+            // Now I have the subject code
+            // Add to subject list.
+            this.searchField = unit_code
+
+        },
+
+        onFocus() {
+            this.focus = true
+        },
+
+        onBlur() {
+            this.searchField = ''
+            this.suggestions = []
+            this.activeSuggestionIndex = 0
+            // this.focus = false
+        },
+
+        upActiveSuggestion() {
+            console.log("upSuggestionIndex")
+            if (this.activeSuggestionIndex > 0) {
+                this.activeSuggestionIndex--
+            }
+
+        },
+
+        downActiveSuggestion() {
+            if (this.activeSuggestionIndex < this.suggestions.length - 1) {
+                this.activeSuggestionIndex++
+            }
+
+        },
+
+        activeSuggestion(suggestion) {
+
+            if (this.activeSuggestionIndex == suggestion.index) {
+                return true
+            }
+            return false
+
+        },
+
+        enterSubject() {
+            console.log(this.suggestions[this.activeSuggestionIndex].unit_code)
+
+            let uosCode = this.suggestions[this.activeSuggestionIndex].unit_code
+
+            data = {
+                uosCode: uosCode,
+                id: this.id
+            }
+
+            Event.fire('addSubjectParent', data)
+
+            // console.log(this.id)
+
+            this.searchField = ''
+            this.suggestions = []
+            this.activeSuggestionIndex = 0
+        }
+    },
+
+    computed: {
+
+        isActive: function () {
+            if (this.suggestions.length > 0 && this.focus) {
+                this.show = true
+            } else {
+                this.show = false
+            }
+
+            return this.show
+        }
+    }
+})
+
+
+
 new Vue({
 
     el: '#root',
 
+
     data() {
         return {
+
             totalCreditPoints: 0,
             isSubjectPanelActive: false,
             activeSubject: {}
@@ -349,6 +554,12 @@ new Vue({
         }),
 
         Event.listen('closePanel', () => this.isSubjectPanelActive = false)
+
+        Event.listen('testParent', () => Event.fire('testEvent'))
+
+
+        Event.listen('addSubjectParent', (data) => Event.fire('addSubject', data))
+
     }
 
 })

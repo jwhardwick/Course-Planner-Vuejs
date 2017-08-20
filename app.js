@@ -90,16 +90,33 @@ Vue.component('semesters', {
 
                           </p>
                         </div>
+                            <div class="panel-block" v-for="subject in semester.subjects" >
 
 
-                        <a class="panel-block" v-for="subject in semester.subjects" @click="openSubject(semester, subject)">
-                          <span class="panel-icon">
-                            {{ subject.credit_points }}
-                          </span>
-                          {{ subject.unit_code }}
+
+                                    <a class="button is-small is-outlined" @click="deleteSubject(semester.id, subject.unit_code)" style="opacity:.8;height:20px;width:20px;">
+
+                                        <span class="icon is-small">
+                                            <i class="fa fa-times"></i>
+                                        </span>
+                                    </a>
 
 
-                          </a>
+                                    &nbsp; &nbsp;
+
+                                    <div style="font-family: 'Source Code Pro', monospace;font-weight:500;">
+                                        {{ subject.unit_code }}
+                                    </div>
+
+                                     &nbsp; &nbsp; &nbsp; &nbsp;
+                                    <a class="button is-small is-info is-outlined"  style="opacity:.8;height:20px;width:20px;" @click="openSubject(semester, subject)">
+
+                                        <span class="icon is-small">
+                                            <i class="fa fa-info"></i>
+                                        </span>
+                                    </a>
+
+                          </div>
                       </nav>
 
                     </div>
@@ -197,7 +214,6 @@ Vue.component('semesters', {
                   // console.log(error);
               })
         },
-
         openSubject(semester, subject) {
 
             // console.log(subject)
@@ -230,10 +246,22 @@ Vue.component('semesters', {
             }
 
         },
-
         chooseSubject(unit_code) {
             // this.isActive = false
             this.searchField = unit_code
+        },
+        deleteSubject(id, unit_code) {
+            for (let i = 0; i < this.semesters[id].subjects.length; i++) {
+                // console.log("Deleting subject: ", unit_code)
+                // Iterate through subjects and remove matching unit_codes
+                if (this.semesters[id].subjects[i].unit_code == unit_code) {
+                    // Lower credit points
+                    this.semesters[id].creditPoints -= parseInt(this.semesters[id].subjects[i].credit_points)
+                    Event.fire('addPoints', parseInt(-this.semesters[id].subjects[i].credit_points))
+                    // Remove subject
+                    this.semesters[id].subjects.splice(i, 1)
+                }
+            }
         }
 
     },
@@ -257,27 +285,7 @@ Vue.component('semesters', {
 
     }
 
-
-
-
-
 })
-
-// Vue.component('semester', {
-//
-//     props: {
-//         year: { required: true },
-//         semester: { require: false }
-//     },
-//
-//     template: `
-//         <div><slot></slot></div>
-//     `
-// });
-
-
-
-// import axios from 'axios';
 
 window.Event = new class {
 
@@ -350,7 +358,6 @@ Vue.component('subject-panel', {
     }
 
 })
-
 
 Vue.component('autocomplete', {
 
@@ -432,12 +439,18 @@ Vue.component('autocomplete', {
         },
 
         chooseSubject(unit_code) {
-            // this.isActive = false
-            // console.log(unit_code)
+            data = {
+                uosCode: unit_code,
+                id: this.id
+            }
 
-            // Now I have the subject code
-            // Add to subject list.
-            this.searchField = unit_code
+            Event.fire('addSubjectParent', data)
+
+            // // console.log(this.id)
+
+            this.searchField = ''
+            this.suggestions = []
+            this.activeSuggestionIndex = 0
 
         },
 
@@ -479,20 +492,27 @@ Vue.component('autocomplete', {
         enterSubject() {
             // console.log(this.suggestions[this.activeSuggestionIndex].unit_code)
 
-            let uosCode = this.suggestions[this.activeSuggestionIndex].unit_code
+            try {
+                let uosCode = this.suggestions[this.activeSuggestionIndex].unit_code
+                data = {
+                    uosCode: uosCode,
+                    id: this.id
+                }
 
-            data = {
-                uosCode: uosCode,
-                id: this.id
+                Event.fire('addSubjectParent', data)
+
+                // // console.log(this.id)
+
+                this.searchField = ''
+                this.suggestions = []
+                this.activeSuggestionIndex = 0
+            }
+            catch (err) {
+                // Subject not valid
+                return
             }
 
-            Event.fire('addSubjectParent', data)
 
-            // // console.log(this.id)
-
-            this.searchField = ''
-            this.suggestions = []
-            this.activeSuggestionIndex = 0
         }
     },
 
@@ -548,7 +568,6 @@ Vue.component('vue-logo', {
     `
 })
 
-
 Vue.component('app-footer', {
 
     template: `
@@ -572,6 +591,15 @@ Vue.component('app-footer', {
 })
 
 Vue.component('fluid-cont', {
+
+    template: `
+        <div class="container is-fluid">
+
+        </div>
+    `,
+})
+
+Vue.component('delete-subject', {
 
     template: `
         <div class="container is-fluid">

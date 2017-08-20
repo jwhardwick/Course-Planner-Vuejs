@@ -310,7 +310,7 @@ Vue.component('subject-panel', {
     template: `
 
             <div class="modal is-active">
-              <div class="modal-background"></div>
+              <div class="modal-background" @click="closeSubjectPanel"></div>
               <div class="modal-card">
 
                 <header class="modal-card-head">
@@ -330,21 +330,21 @@ Vue.component('subject-panel', {
                         <strong>Prerequisites: </strong>{{ subjectData.prerequisite }}
                     </p>
 
+                    <p v-if="subjectData.assumed_knowledge">
+                        <strong>Assumed knowledge: </strong>{{ subjectData.assumed_knowledge }}
+                    </p>
+
                     <p v-if="subjectData.prohitibitions">
                         <strong>Prohibitions: </strong>{{ subjectData.prohitibitions }}
                     </p>
 
-                    <a v-if="subjectData.link" :href="subjectData.link">
-                        <strong>Read more</strong>
-                    </a>
 
                   {{ subjectData.about }}
 
                 </section>
 
                 <footer class="modal-card-foot">
-                  <button class="button is-success">Save changes</button>
-                  <button class="button" @click="closeSubjectPanel">Cancel</button>
+                  <a class="button is-success" :href="subjectData.link" target="_blank">Read more</a>
                 </footer>
               </div>
             </div>

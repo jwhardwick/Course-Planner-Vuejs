@@ -94,27 +94,22 @@ Vue.component('semesters', {
 
 
 
-                                    <a class="button is-small is-outlined" @click="deleteSubject(semester.id, subject.unit_code)" style="opacity:.8;height:20px;width:20px;">
+                                    <a class="button is-normal is-light" @click="deleteSubject(semester.id, subject.unit_code)" style="opacity:.8;color:rgba(0, 0, 0, 0.7);">
 
                                         <span class="icon is-small">
                                             <i class="fa fa-times"></i>
                                         </span>
                                     </a>
 
+                                    <a class="button is-normal is-light" style="width:125px;" @click="openSubject(semester, subject)">
 
-                                    &nbsp; &nbsp;
 
-                                    <div style="font-family: 'Source Code Pro', monospace;font-weight:500;">
                                         {{ subject.unit_code }}
-                                    </div>
+                                        &nbsp; &nbsp;
 
-                                     &nbsp; &nbsp; &nbsp; &nbsp;
-                                    <a class="button is-small is-info is-outlined"  style="opacity:.8;height:20px;width:20px;" @click="openSubject(semester, subject)">
-
-                                        <span class="icon is-small">
-                                            <i class="fa fa-info"></i>
-                                        </span>
                                     </a>
+
+
 
                           </div>
                       </nav>

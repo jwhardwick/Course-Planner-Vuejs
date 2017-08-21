@@ -60,11 +60,11 @@ Vue.component('semesters', {
           </div>
 
 
-          <div class="columns">
+          <div class="columns" v-for="count in 20">
 
-            <div class="column is-2" v-for="semester in semesters">
+            <div class="column is-2" v-for="semester in semesters" v-if="semester.id >= ( (count - 1) * nSemesters) && semester.id < (nSemesters + nSemesters * (count - 1) )" style="min-width:220px;min-height:220px;">
 
-                <nav class="level-left has-addons" >
+                <nav class="level-left has-addons">
 
                   <div class="level">
                     <div class="level-item">
@@ -272,6 +272,20 @@ Vue.component('semesters', {
 
             return this.show
         },
+        nSemesters: function () {
+            let w = window.innerWidth;
+            console.log(w)
+            if (w < 800) {
+                return 2
+            }
+            else if (w < 1400) {
+                return 4
+            }
+            else {
+                return 6
+            }
+
+        }
     },
 
     mounted() {

@@ -28,43 +28,12 @@ Vue.component('semesters', {
 
     template: `
     <div>
-        <div class="field has-addons">
-            <a class="button is-success is-outlined" @click="addSemester">
-                <i class="fa fa-plus" aria-hidden="true"></i>
-                &nbsp;
-                Semester
+      <div v-for="count in 20" class="section">
+          <div class="columns" style="" >
 
+            <div class="column is-2"  style="min-width:220px;min-height:220px;float:left;" v-for="semester in semesters" v-if="semester.id >= ( (count - 1) * nSemesters) && semester.id < (nSemesters + nSemesters * (count - 1) )">
 
-
-            </a>
-
-            <div class="control" v-show="showDropdown" >
-                  <div class="select" >
-                    <select v-model="nextSemester.year">
-                      <option>2009</option>
-                      <option>2010</option>
-                      <option>2011</option>
-                      <option>2012</option>
-                      <option>2013</option>
-                      <option>2014</option>
-                      <option>2015</option>
-                      <option>2016</option>
-                      <option>2017</option>
-                      <option>2018</option>
-                      <option>2019</option>
-                    </select>
-                  </div>
-                  <p class="help">Starting year</p>
-              </div>
-
-          </div>
-
-
-          <div class="columns" v-for="count in 20">
-
-            <div class="column is-2" v-for="semester in semesters" v-if="semester.id >= ( (count - 1) * nSemesters) && semester.id < (nSemesters + nSemesters * (count - 1) )" style="min-width:220px;min-height:220px;">
-
-                <nav class="level-left has-addons">
+                <nav class="level-left has-addons" style="margin-top:0px;">
 
                   <div class="level">
                     <div class="level-item">
@@ -118,7 +87,7 @@ Vue.component('semesters', {
                   </div>
 
                 </nav>
-
+            </div>
             </div>
 
           </div>
@@ -139,7 +108,7 @@ Vue.component('semesters', {
                 id: 0,
                 isSelected: false,
                 field: '',
-                year: 2016,
+                year: 0,
                 sem: 1,
                 subjects: [],
                 creditPoints: 0
@@ -160,6 +129,40 @@ Vue.component('semesters', {
         addSemester() {
             // Get rid of year selection dropdown
             this.showDropdown = false
+
+            // Build our semester to add
+            let newSemester = {
+                id: this.nextSemester.id,
+                isSelected: false,
+                field: '',
+                year: this.nextSemester.year,
+                sem: this.nextSemester.sem,
+                subjects: [],
+                creditPoints: 0
+            }
+            this.semesters.push(newSemester)
+
+            // reset and get ready for next semester
+            if (this.nextSemester.sem == 2) {
+                this.nextSemester.sem = 1
+                this.nextSemester.year++
+            } else {
+                this.nextSemester.sem++
+            }
+
+            this.nextSemester.id++
+            this.nextSemester.year           = parseInt(this.nextSemester.year)
+            this.nextSemester.subjects       = []
+            this.nextSemester.searchField    = ''
+            this.nextSemester.isSelected     = false
+            this.nextSemester.creditPoints   = 0
+        },
+
+        addSemesterRemote(data) {
+            // See if payload has year attached
+            if (data.year) {
+                this.nextSemester.year = data.year
+            }
 
             // Build our semester to add
             let newSemester = {
@@ -274,7 +277,7 @@ Vue.component('semesters', {
         },
         nSemesters: function () {
             let w = window.innerWidth;
-            console.log(w)
+            // console.log(w)
             if (w < 800) {
                 return 2
             }
@@ -284,13 +287,16 @@ Vue.component('semesters', {
             else {
                 return 6
             }
-
         }
     },
 
     mounted() {
 
+        // Add subject selected by Autocomplete
         Event.listen('addSubject', (data) => this.getCourse(data.uosCode, data.id))
+
+        // Add semester from add semester button
+        Event.listen('sendSemesterComponnent', (data) => this.addSemesterRemote(data))
 
     }
 
@@ -539,6 +545,62 @@ Vue.component('autocomplete', {
     }
 })
 
+Vue.component('add-semester-button', {
+
+    data () {
+        return {
+            showDropdown: true,
+            year: '2016'
+        }
+    },
+
+    template: `
+        <div class="field has-addons">
+            <a class="button is-success is-outlined" @click="sendSemester">
+                <i class="fa fa-plus" aria-hidden="true"></i>
+                &nbsp;
+                Semester
+            </a>
+
+            <div class="control" v-show="showDropdown" >
+                  <div class="select" >
+                    <select v-model="year">
+                      <option>2009</option>
+                      <option>2010</option>
+                      <option>2011</option>
+                      <option>2012</option>
+                      <option>2013</option>
+                      <option>2014</option>
+                      <option>2015</option>
+                      <option>2016</option>
+                      <option>2017</option>
+                      <option>2018</option>
+                      <option>2019</option>
+                    </select>
+                  </div>
+                  <p class="help">Starting year</p>
+              </div>
+          </div>
+      </div>
+    `,
+
+    methods: {
+
+        sendSemester() {
+            // Send add semester event with optional year payload
+            data = {}
+            if (this.showDropdown) {
+                data.year = this.year
+                this.showDropdown = false
+            }
+            Event.fire('sendSemesterParent', data)
+
+
+        },
+
+    }
+})
+
 Vue.component('vue-logo', {
     template: `
               <p>
@@ -658,12 +720,17 @@ new Vue({
 
         }),
 
+        // Close the modal panel for subjects
         Event.listen('closePanel', () => this.isSubjectPanelActive = false)
 
+        // Event tester
         Event.listen('testParent', () => Event.fire('testEvent'))
 
-
+        // Ferry subject data for autocomplete compononet
         Event.listen('addSubjectParent', (data) => Event.fire('addSubject', data))
+
+        // Ferry semester data for Add Semester button
+        Event.listen('sendSemesterParent', (data) => Event.fire('sendSemesterComponnent', data))
 
     }
 

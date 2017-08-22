@@ -28,8 +28,8 @@ Vue.component('semesters', {
 
     template: `
     <div>
-      <div v-for="count in 20" class="section">
-          <div class="columns" style="" >
+      <div v-for="count in this.semesters.length" >
+          <div class="columns" style="">
 
             <div class="column is-2"  style="min-width:220px;min-height:220px;float:left;" v-for="semester in semesters" v-if="semester.id >= ( (count - 1) * nSemesters) && semester.id < (nSemesters + nSemesters * (count - 1) )">
 
@@ -103,7 +103,6 @@ Vue.component('semesters', {
 
     data() {
         return {
-
             nextSemester: {
                 id: 0,
                 isSelected: false,
@@ -129,6 +128,8 @@ Vue.component('semesters', {
         addSemester() {
             // Get rid of year selection dropdown
             this.showDropdown = false
+
+
 
             // Build our semester to add
             let newSemester = {
@@ -260,6 +261,10 @@ Vue.component('semesters', {
                     this.semesters[id].subjects.splice(i, 1)
                 }
             }
+        },
+        nSections() {
+            console.log("nSections")
+            return this.semesters.length % nSemesters
         }
 
     },
@@ -279,9 +284,9 @@ Vue.component('semesters', {
             let w = window.innerWidth;
             // console.log(w)
             if (w < 800) {
-                return 2
+                return 4
             }
-            else if (w < 1400) {
+            else if (w < 1600) {
                 return 4
             }
             else {
@@ -678,6 +683,7 @@ Vue.component('delete-subject', {
         </div>
     `,
 })
+
 
 new Vue({
 

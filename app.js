@@ -77,27 +77,14 @@ Vue.component('semesters', {
                                         &nbsp; &nbsp;
 
                                     </a>
-
-
-
                           </div>
                       </nav>
-
                     </div>
                   </div>
-
                 </nav>
             </div>
             </div>
-
           </div>
-
-
-
-
-
-
-
     </div>
     `,
 
@@ -683,6 +670,10 @@ Vue.component('delete-subject', {
         </div>
     `,
 })
+
+// Vue.component('drag-test', {
+//
+// })
 
 
 new Vue({
